@@ -22,9 +22,10 @@ import java.util.List;
  */
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
 
+    public static final int CONTACT_ITEM = 100;
+    public static final int CONTACT_SEPARATOR = 101;
     private static final String TAG = "ContactAdapter";
-
-    private List<Contact> contactList = new ArrayList<>();
+    private List<ContactItem> contactList = new ArrayList<>();
     private HashMap<String, Integer> contactPositions = new HashMap<>();
     private Context context;
 
@@ -33,43 +34,52 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         this.context = context;
     }
 
-    private void buildContactPositions() {
+    private void buildContacts(List<Contact> contacts) {
         contactPositions.clear();
-        for (int i = 0; i < contactList.size(); i++) {
-            String letter = contactList.get(i).getName().substring(0, 1);
+        contactList.clear();
+        int position = 0;
+        for (int i = 0; i < contacts.size(); i++) {
+            String letter = contacts.get(i).getName().substring(0, 1).toUpperCase();
             if (!contactPositions.containsKey(letter)) {
-                Log.d(TAG, "buildContactPositions: '" + letter + "' pos=" + i);
-                contactPositions.put(letter, i);
+                contactPositions.put(letter, contactList.size());
+                contactList.add(new ContactItem(letter));
             }
+            contactList.add(new ContactItem(contacts.get(i)));
         }
     }
 
-    public List<Contact> getContactList() {
-        return contactList;
-    }
-
     public void setContactList(List<Contact> contactList) {
-        this.contactList = contactList;
-        buildContactPositions();
+        buildContacts(contactList);
         notifyDataSetChanged();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.contact_item, parent, false);
-        ViewHolder vh = new ViewHolder(v);
+                .inflate(viewType == CONTACT_ITEM ? R.layout.contact_item : R.layout.contact_separator, parent, false);
+        ViewHolder vh = new ViewHolder(v, viewType);
         return vh;
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return contactList.get(position).getType();
+    }
+
+    @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Contact contact = contactList.get(position);
-        holder.name.setText(contact.getName());
-        if (contact.getPhotoUri() != null && !contact.getPhotoUri().isEmpty()) {
-            Picasso.with(context).load(contact.getPhotoUri()).into(holder.image);
+        ContactItem item = contactList.get(position);
+        if (holder.type == CONTACT_ITEM) {
+            Contact contact = item.contact;
+            holder.name.setText(contact.getName());
+            if (contact.getPhotoUri() != null && !contact.getPhotoUri().isEmpty()) {
+                Picasso.with(context).load(contact.getPhotoUri()).into(holder.image);
+            } else {
+                holder.image.setImageResource(R.drawable.ic_contact);
+            }
         } else {
-            holder.image.setImageResource(R.drawable.ic_contact);
+            Log.d(TAG, "onBindViewHolder: pos:" + position + " is separator!");
+            holder.letter.setText(item.header);
         }
     }
 
@@ -80,9 +90,9 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
     public void moveContact(int fromPos, int toPos) {
         Log.d(TAG, "moveContact() called with: " + "fromPos = [" + fromPos + "], toPos = [" + toPos + "]");
-        Contact contact = contactList.get(fromPos);
+        ContactItem item = contactList.get(fromPos);
         contactList.remove(fromPos);
-        contactList.add(toPos, contact);
+        contactList.add(toPos, item);
         notifyItemMoved(fromPos, toPos);
     }
 
@@ -95,20 +105,54 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     public int getContactPositionByLetter(char letter) {
         Log.d(TAG, "getContactPositionByLetter() called with: " + "letter = [" + letter + "] contactPositions=" + contactPositions.size());
         if (!contactPositions.containsKey(letter + "")) {
-            Log.d(TAG, "getContactPositionByLetter: 0");
-            return 0;
+            return -1;
         }
         return contactPositions.get(letter + "");
+    }
+
+    public boolean isSeparator(RecyclerView.ViewHolder viewHolder) {
+        ViewHolder vh = (ViewHolder) viewHolder;
+        return vh.isSeparator();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView name;
         public ImageView image;
+        public TextView letter;
+        public int type;
 
-        public ViewHolder(View v) {
+        public ViewHolder(View v, int viewType) {
             super(v);
+            type = viewType;
             name = (TextView) itemView.findViewById(R.id.contact_name);
             image = (ImageView) itemView.findViewById(R.id.contact_image);
+            letter = (TextView) itemView.findViewById(R.id.contact_letter);
+        }
+
+        public boolean isSeparator() {
+            return type == CONTACT_SEPARATOR;
         }
     }
+
+    private class ContactItem {
+        String header = "";
+        Contact contact;
+
+        public ContactItem(String letter) {
+            this.contact = null;
+            this.header = letter;
+        }
+
+        public ContactItem(Contact contact) {
+            this.header = "";
+            this.contact = contact;
+        }
+
+        public int getType() {
+            return contact != null ? CONTACT_ITEM : CONTACT_SEPARATOR;
+        }
+    }
+
+    ;
 }
+

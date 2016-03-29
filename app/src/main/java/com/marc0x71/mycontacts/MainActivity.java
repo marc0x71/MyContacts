@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.marc0x71.mycontacts.adapter.ContactAdapter;
 import com.marc0x71.mycontacts.data.Contact;
@@ -22,11 +23,12 @@ import rx.Subscriber;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    private static final int POSITION_OFFSET = 20;
+    private static final int POSITION_OFFSET = 32;
 
     private ContactAdapter myAdapter;
     private ListView indexList;
     private LinearLayoutManager myLayoutManager;
+    private RecyclerView myRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
         indexList = (ListView) findViewById(R.id.index_list);
 
-        RecyclerView myRecyclerView = (RecyclerView) findViewById(R.id.contact_list);
+        myRecyclerView = (RecyclerView) findViewById(R.id.contact_list);
 
         if (myRecyclerView != null) {
             myRecyclerView.setHasFixedSize(false);
@@ -48,6 +50,19 @@ public class MainActivity extends AppCompatActivity {
             ItemTouchHelper myItemTouchHelper = new ItemTouchHelper(
                     new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
                             ItemTouchHelper.LEFT) {
+
+                        @Override
+                        public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                            if (myAdapter.isSeparator(viewHolder)) return 0;
+                            return super.getSwipeDirs(recyclerView, viewHolder);
+                        }
+
+                        @Override
+                        public boolean canDropOver(RecyclerView recyclerView, RecyclerView.ViewHolder current, RecyclerView.ViewHolder target) {
+                            if (myAdapter.isSeparator(current)) return false;
+                            return super.canDropOver(recyclerView, current, target);
+                        }
+
                         @Override
                         public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                             final int fromPos = viewHolder.getAdapterPosition();
@@ -60,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                             final int position = viewHolder.getAdapterPosition();
-                            ;
                             myAdapter.removeContact(position);
                         }
                     });
@@ -83,10 +97,12 @@ public class MainActivity extends AppCompatActivity {
         indexList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG, "onItemClick: pos=" + position + " id=" + id);
                 int contactPosition = myAdapter.getContactPositionByLetter((char) ('A' + id));
-                Log.d(TAG, "onItemClick: contactPosition=" + contactPosition);
-                myLayoutManager.scrollToPositionWithOffset(contactPosition, POSITION_OFFSET);
+                if (contactPosition < 0) {
+                    Toast.makeText(MainActivity.this, "No items found for " + (char) ('A' + id), Toast.LENGTH_SHORT).show();
+                } else {
+                    myLayoutManager.scrollToPositionWithOffset(contactPosition, POSITION_OFFSET);
+                }
             }
         });
         Log.d(TAG, "buildIndex() called with: " + index);
