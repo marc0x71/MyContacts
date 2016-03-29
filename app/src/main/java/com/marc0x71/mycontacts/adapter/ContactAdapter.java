@@ -2,7 +2,6 @@ package com.marc0x71.mycontacts.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Created by marc0x71 on 22/03/2016.
  */
@@ -24,13 +25,13 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
     public static final int CONTACT_ITEM = 100;
     public static final int CONTACT_SEPARATOR = 101;
-    private static final String TAG = "ContactAdapter";
+
     private List<ContactItem> contactList = new ArrayList<>();
     private HashMap<String, Integer> contactPositions = new HashMap<>();
     private Context context;
 
     public ContactAdapter(Context context) {
-        Log.d(TAG, "ContactAdapter() called with: " + "context = [" + context + "]");
+        Timber.d("ContactAdapter() called with: " + "context = [" + context + "]");
         this.context = context;
     }
 
@@ -78,7 +79,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 holder.image.setImageResource(R.drawable.ic_contact);
             }
         } else {
-            Log.d(TAG, "onBindViewHolder: pos:" + position + " is separator!");
+            Timber.d("onBindViewHolder: pos:" + position + " is separator!");
             holder.letter.setText(item.header);
         }
     }
@@ -89,7 +90,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     public void moveContact(int fromPos, int toPos) {
-        Log.d(TAG, "moveContact() called with: " + "fromPos = [" + fromPos + "], toPos = [" + toPos + "]");
+        Timber.d("moveContact() called with: " + "fromPos = [" + fromPos + "], toPos = [" + toPos + "]");
         ContactItem item = contactList.get(fromPos);
         contactList.remove(fromPos);
         contactList.add(toPos, item);
@@ -97,13 +98,13 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     public void removeContact(int position) {
-        Log.d(TAG, "removeContact() called with: " + "position = [" + position + "]");
+        Timber.d("removeContact() called with: " + "position = [" + position + "]");
         contactList.remove(position);
         notifyItemRemoved(position);
     }
 
     public int getContactPositionByLetter(char letter) {
-        Log.d(TAG, "getContactPositionByLetter() called with: " + "letter = [" + letter + "] contactPositions=" + contactPositions.size());
+        Timber.d("getContactPositionByLetter() called with: " + "letter = [" + letter + "] contactPositions=" + contactPositions.size());
         if (!contactPositions.containsKey(letter + "")) {
             return -1;
         }

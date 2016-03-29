@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,10 +18,10 @@ import com.marc0x71.mycontacts.usecase.GetAllContactUseCase;
 import java.util.List;
 
 import rx.Subscriber;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
     private static final int POSITION_OFFSET = 32;
 
     private ContactAdapter myAdapter;
@@ -105,12 +104,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        Log.d(TAG, "buildIndex() called with: " + index);
+        Timber.d("buildIndex() called with: " + index);
 
     }
 
     private void loadContacts() {
-        Log.d(TAG, "loadContacts: get list... " + getApplicationContext());
+        Timber.d("loadContacts: get list... " + getApplicationContext());
         GetAllContactUseCase useCase = new GetAllContactUseCase(getApplicationContext());
         useCase.getAllAsList().subscribe(new Subscriber<List<Contact>>() {
             @Override
