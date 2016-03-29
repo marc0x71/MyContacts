@@ -47,6 +47,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             }
             contactList.add(new ContactItem(contacts.get(i)));
         }
+        Timber.d("buildContacts() done!");
     }
 
     public void setContactList(List<Contact> contactList) {
