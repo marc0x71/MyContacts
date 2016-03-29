@@ -44,6 +44,9 @@ dependencies {
     // timber
     compile 'com.jakewharton.timber:timber:4.1.1'
 
+    // CircleImageView
+    compile 'de.hdodenhof:circleimageview:2.0.0'
+
     // test
     testCompile 'junit:junit:4.12'
 }

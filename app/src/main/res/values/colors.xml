@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="contactSeparatorBackground">#803f51b5</color>
     <color name="contactSeparatorColor">#ffffff</color>
+    <color name="contactImageBorder">#803f51b5</color>
 </resources>
