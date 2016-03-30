@@ -115,6 +115,26 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         return vh.isSeparator();
     }
 
+    public boolean canMoveContact(int fromPos, int toPos) {
+        Timber.d("canMoveContact: from=%d to=%d", fromPos, toPos);
+        int startingSection = -1;
+        for (int i = fromPos; i >= 0; i--) {
+            if (contactList.get(i).getType() == CONTACT_SEPARATOR) {
+                startingSection = i;
+                break;
+            }
+        }
+        int targetSection = -1;
+        for (int i = toPos; i >= 0; i--) {
+            if (contactList.get(i).getType() == CONTACT_SEPARATOR) {
+                targetSection = i;
+                break;
+            }
+        }
+        Timber.d("canMoveContact: startingSection=%d targetSection=%d", startingSection, targetSection);
+        return startingSection == targetSection;
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView name;
         public ImageView image;

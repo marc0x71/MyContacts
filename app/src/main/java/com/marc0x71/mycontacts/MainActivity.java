@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
                             final int fromPos = viewHolder.getAdapterPosition();
                             final int toPos = target.getAdapterPosition();
                             if (fromPos == toPos) return false;
+                            if (!myAdapter.canMoveContact(fromPos, toPos)) return false;
                             myAdapter.moveContact(fromPos, toPos);
                             return true;
                         }
