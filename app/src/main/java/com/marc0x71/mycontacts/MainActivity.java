@@ -85,6 +85,14 @@ public class MainActivity extends AppCompatActivity {
                     });
             myItemTouchHelper.attachToRecyclerView(myRecyclerView);
 
+            myRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    myAdapter.onScroll(myLayoutManager.findFirstVisibleItemPosition(), myLayoutManager.findLastVisibleItemPosition());
+                    super.onScrolled(recyclerView, dx, dy);
+                }
+            });
+
             loadContacts();
         }
 

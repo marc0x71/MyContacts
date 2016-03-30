@@ -30,6 +30,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     private List<ContactItem> contactList = new ArrayList<>();
     private HashMap<String, Integer> contactPositions = new HashMap<>();
     private Context context;
+    private RecyclerView myRecyclerView;
 
     public ContactAdapter(Context context) {
         this.context = context;
@@ -135,6 +136,31 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         return startingSection == targetSection;
     }
 
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        myRecyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        myRecyclerView = null;
+    }
+
+    public void onScroll(int firstVisibleItemPosition, int lastVisibleItemPosition) {
+        if (myRecyclerView == null) {
+            Timber.w("Unexpected call on onScroll");
+            return;
+        }
+        for (int i = firstVisibleItemPosition; i <= lastVisibleItemPosition; i++) {
+            if (contactList.get(i).getType() == CONTACT_SEPARATOR) {
+                ViewHolder holder = (ViewHolder) myRecyclerView.findViewHolderForAdapterPosition(i);
+                holder.letter.setTranslationY((float) ((firstVisibleItemPosition - i) * 4.5));
+            }
+        }
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView name;
         public ImageView image;
@@ -152,6 +178,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         public boolean isSeparator() {
             return type == CONTACT_SEPARATOR;
         }
+
     }
 
     private class ContactItem {
