@@ -1,6 +1,7 @@
 package com.marc0x71.mycontacts.adapter;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import timber.log.Timber;
 
 /**
@@ -26,14 +29,15 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     public static final int CONTACT_ITEM = 100;
     public static final int CONTACT_SEPARATOR = 101;
 
-
     private List<ContactItem> contactList = new ArrayList<>();
     private HashMap<String, Integer> contactPositions = new HashMap<>();
     private Context context;
     private RecyclerView myRecyclerView;
+    private OnClickListener clickListener;
 
-    public ContactAdapter(Context context) {
+    public ContactAdapter(Context context, OnClickListener clickListener) {
         this.context = context;
+        this.clickListener = clickListener;
     }
 
     private void buildContacts(List<Contact> contacts) {
@@ -72,6 +76,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         ContactItem item = contactList.get(position);
         if (holder.type == CONTACT_ITEM) {
             Contact contact = item.contact;
+            holder.position = position;
             holder.name.setText(contact.getName());
             if (contact.getPhotoUri() != null && !contact.getPhotoUri().isEmpty()) {
                 Picasso.with(context).load(contact.getPhotoUri()).into(holder.image);
@@ -79,7 +84,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 holder.image.setImageResource(R.drawable.ic_contact);
             }
         } else {
-            Timber.d("onBindViewHolder: pos:%d is separator!", position);
             holder.letter.setText(item.header);
         }
     }
@@ -117,7 +121,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     public boolean canMoveContact(int fromPos, int toPos) {
-        Timber.d("canMoveContact: from=%d to=%d", fromPos, toPos);
         int startingSection = -1;
         for (int i = fromPos; i >= 0; i--) {
             if (contactList.get(i).getType() == CONTACT_SEPARATOR) {
@@ -132,7 +135,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 break;
             }
         }
-        Timber.d("canMoveContact: startingSection=%d targetSection=%d", startingSection, targetSection);
         return startingSection == targetSection;
     }
 
@@ -150,7 +152,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
     public void onScroll(int firstVisibleItemPosition, int lastVisibleItemPosition) {
         if (myRecyclerView == null) {
-            Timber.w("Unexpected call on onScroll");
+            Timber.w("Unexpected call of onScroll");
             return;
         }
         for (int i = firstVisibleItemPosition; i <= lastVisibleItemPosition; i++) {
@@ -161,18 +163,45 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    private void onItemClick(int position) {
+        Timber.d("onItemClick(%d)", position);
+        if (clickListener != null)
+            clickListener.onClick(position, contactList.get(position).contact);
+    }
+
+    public interface OnClickListener {
+        public void onClick(int position, Contact contact);
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        @Nullable
+        @Bind(R.id.contact_name)
         public TextView name;
+
+        @Nullable
+        @Bind(R.id.contact_image)
         public ImageView image;
+
+        @Nullable
+        @Bind(R.id.contact_letter)
         public TextView letter;
+
         public int type;
+
+        int position = -1;
 
         public ViewHolder(View v, int viewType) {
             super(v);
+            ButterKnife.bind(this, v);
             type = viewType;
-            name = (TextView) itemView.findViewById(R.id.contact_name);
-            image = (ImageView) itemView.findViewById(R.id.contact_image);
-            letter = (TextView) itemView.findViewById(R.id.contact_letter);
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!isSeparator() && position >= 0) {
+                        onItemClick(position);
+                    }
+                }
+            });
         }
 
         public boolean isSeparator() {
@@ -199,6 +228,5 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             return contact != null ? CONTACT_ITEM : CONTACT_SEPARATOR;
         }
     }
-
 }
 

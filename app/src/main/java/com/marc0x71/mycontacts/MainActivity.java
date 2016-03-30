@@ -1,10 +1,12 @@
 package com.marc0x71.mycontacts;
 
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.AdapterView;
@@ -18,15 +20,22 @@ import com.marc0x71.mycontacts.usecase.GetAllContactUseCase;
 
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import rx.Subscriber;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int POSITION_OFFSET = 32;
     private static final String[] ALPHABET = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
-
+    @Bind(R.id.index_list)
+    ListView indexList;
+    @Bind(R.id.contact_list)
+    RecyclerView myRecyclerView;
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
     private ContactAdapter myAdapter;
-    private ListView indexList;
     private LinearLayoutManager myLayoutManager;
 
     @Override
@@ -34,16 +43,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        indexList = (ListView) findViewById(R.id.index_list);
+        ButterKnife.bind(this);
 
-        RecyclerView myRecyclerView = (RecyclerView) findViewById(R.id.contact_list);
+        setSupportActionBar(toolbar);
+
 
         if (myRecyclerView != null) {
             myRecyclerView.setHasFixedSize(false);
             myLayoutManager = new LinearLayoutManager(getApplicationContext());
             myRecyclerView.setLayoutManager(myLayoutManager);
 
-            myAdapter = new ContactAdapter(getApplicationContext());
+            myAdapter = new ContactAdapter(getApplicationContext(), new ContactAdapter.OnClickListener() {
+                @Override
+                public void onClick(int position, Contact contact) {
+                    showContact(contact);
+                }
+            });
             myRecyclerView.setAdapter(myAdapter);
 
             ItemTouchHelper myItemTouchHelper = new ItemTouchHelper(
@@ -93,10 +108,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+
             loadContacts();
         }
 
         buildIndex();
+    }
+
+    private void showContact(Contact contact) {
+        Intent intent = new Intent(getApplicationContext(), ContactActivity.class);
+        intent.putExtra(ContactActivity.CONTACT_ID, contact.getId());
+        startActivity(intent);
     }
 
     private void buildIndex() {
@@ -126,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(Throwable e) {
+                Timber.e("Loading contacts error", e);
 
             }
 
