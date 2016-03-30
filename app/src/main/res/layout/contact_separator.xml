@@ -5,7 +5,7 @@
     android:layout_height="64dp"
     android:layout_marginBottom="-20dp"
     android:layout_marginTop="-16dp"
-    android:background="@color/contactSeparatorBackground"
+    android:background="@drawable/header_background"
     android:orientation="vertical"
     android:padding="16dp"
     tools:ignore="NegativeMargin,Overdraw">
