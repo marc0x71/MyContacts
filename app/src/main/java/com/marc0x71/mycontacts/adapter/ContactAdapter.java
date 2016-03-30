@@ -26,6 +26,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     public static final int CONTACT_ITEM = 100;
     public static final int CONTACT_SEPARATOR = 101;
 
+
     private List<ContactItem> contactList = new ArrayList<>();
     private HashMap<String, Integer> contactPositions = new HashMap<>();
     private Context context;

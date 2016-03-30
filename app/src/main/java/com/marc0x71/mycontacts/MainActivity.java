@@ -1,5 +1,6 @@
 package com.marc0x71.mycontacts;
 
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +23,7 @@ import rx.Subscriber;
 public class MainActivity extends AppCompatActivity {
 
     private static final int POSITION_OFFSET = 32;
+    private static final String[] ALPHABET = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 
     private ContactAdapter myAdapter;
     private ListView indexList;
@@ -49,6 +51,12 @@ public class MainActivity extends AppCompatActivity {
                             ItemTouchHelper.LEFT) {
 
                         @Override
+                        public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                            c.setDensity(50);
+                            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                        }
+
+                        @Override
                         public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
                             if (myAdapter.isSeparator(viewHolder)) return 0;
                             return super.getSwipeDirs(recyclerView, viewHolder);
@@ -56,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public boolean canDropOver(RecyclerView recyclerView, RecyclerView.ViewHolder current, RecyclerView.ViewHolder target) {
-                            return !myAdapter.isSeparator(current) && super.canDropOver(recyclerView, current, target);
+                            return !myAdapter.isSeparator(current) && !myAdapter.isSeparator(target) && super.canDropOver(recyclerView, current, target);
                         }
 
                         @Override
@@ -83,12 +91,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void buildIndex() {
-        String index[] = new String['Z' - 'A' + 1];
-        int i = 0;
-        for (char letter = 'A'; letter <= 'Z'; letter++) {
-            index[i++] = "" + letter;
-        }
-        indexList.setAdapter(new ArrayAdapter<>(this, R.layout.letter, index));
+
+        indexList.setAdapter(new ArrayAdapter<>(this, R.layout.letter, ALPHABET));
 
         indexList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
