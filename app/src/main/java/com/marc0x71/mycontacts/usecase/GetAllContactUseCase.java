@@ -18,7 +18,6 @@ import rx.schedulers.Schedulers;
 
 public class GetAllContactUseCase {
 
-    private static final String TAG = "GetAllContactUseCase";
     Context context;
 
     public GetAllContactUseCase(Context context) {
@@ -27,13 +26,12 @@ public class GetAllContactUseCase {
 
     private Cursor prepareCursor() {
         ContentResolver resolver = context.getContentResolver();
-        Cursor cursor = resolver.query(
+        return resolver.query(
                 ContactsContract.Contacts.CONTENT_URI,
                 new String[]{ContactsContract.PhoneLookup.LOOKUP_KEY, ContactsContract.PhoneLookup.DISPLAY_NAME, ContactsContract.PhoneLookup.PHOTO_URI},
                 ContactsContract.Data.HAS_PHONE_NUMBER + " = '1'",
                 null,
                 ContactsContract.PhoneLookup.DISPLAY_NAME);
-        return cursor;
     }
 
     private Contact buildFromCursor(Cursor cursor) {
@@ -44,6 +42,7 @@ public class GetAllContactUseCase {
         return contact;
     }
 
+    @SuppressWarnings("unused")
     public Observable<Contact> getAll() {
         return Observable.create(new Observable.OnSubscribe<Contact>() {
             @Override
@@ -63,7 +62,7 @@ public class GetAllContactUseCase {
         return Observable.create(new Observable.OnSubscribe<List<Contact>>() {
             @Override
             public void call(Subscriber<? super List<Contact>> subscriber) {
-                List<Contact> list = new ArrayList<Contact>();
+                List<Contact> list = new ArrayList<>();
 
                 Cursor cursor = prepareCursor();
                 while (cursor.moveToNext()) {

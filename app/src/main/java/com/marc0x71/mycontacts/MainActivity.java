@@ -18,7 +18,6 @@ import com.marc0x71.mycontacts.usecase.GetAllContactUseCase;
 import java.util.List;
 
 import rx.Subscriber;
-import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
     private ContactAdapter myAdapter;
     private ListView indexList;
     private LinearLayoutManager myLayoutManager;
-    private RecyclerView myRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
         indexList = (ListView) findViewById(R.id.index_list);
 
-        myRecyclerView = (RecyclerView) findViewById(R.id.contact_list);
+        RecyclerView myRecyclerView = (RecyclerView) findViewById(R.id.contact_list);
 
         if (myRecyclerView != null) {
             myRecyclerView.setHasFixedSize(false);
@@ -58,8 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public boolean canDropOver(RecyclerView recyclerView, RecyclerView.ViewHolder current, RecyclerView.ViewHolder target) {
-                            if (myAdapter.isSeparator(current)) return false;
-                            return super.canDropOver(recyclerView, current, target);
+                            return !myAdapter.isSeparator(current) && super.canDropOver(recyclerView, current, target);
                         }
 
                         @Override
@@ -91,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         for (char letter = 'A'; letter <= 'Z'; letter++) {
             index[i++] = "" + letter;
         }
-        indexList.setAdapter(new ArrayAdapter<String>(this, R.layout.letter, index));
+        indexList.setAdapter(new ArrayAdapter<>(this, R.layout.letter, index));
 
         indexList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -104,12 +101,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        Timber.d("buildIndex() called with: " + index);
-
     }
 
     private void loadContacts() {
-        Timber.d("loadContacts: get list... " + getApplicationContext());
         GetAllContactUseCase useCase = new GetAllContactUseCase(getApplicationContext());
         useCase.getAllAsList().subscribe(new Subscriber<List<Contact>>() {
             @Override

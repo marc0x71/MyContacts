@@ -31,14 +31,12 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     private Context context;
 
     public ContactAdapter(Context context) {
-        Timber.d("ContactAdapter() called with: " + "context = [" + context + "]");
         this.context = context;
     }
 
     private void buildContacts(List<Contact> contacts) {
         contactPositions.clear();
         contactList.clear();
-        int position = 0;
         for (int i = 0; i < contacts.size(); i++) {
             String letter = contacts.get(i).getName().substring(0, 1).toUpperCase();
             if (!contactPositions.containsKey(letter)) {
@@ -59,8 +57,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(viewType == CONTACT_ITEM ? R.layout.contact_item : R.layout.contact_separator, parent, false);
-        ViewHolder vh = new ViewHolder(v, viewType);
-        return vh;
+        return new ViewHolder(v, viewType);
     }
 
     @Override
@@ -80,7 +77,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 holder.image.setImageResource(R.drawable.ic_contact);
             }
         } else {
-            Timber.d("onBindViewHolder: pos:" + position + " is separator!");
+            Timber.d("onBindViewHolder: pos:%d is separator!", position);
             holder.letter.setText(item.header);
         }
     }
@@ -91,7 +88,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     public void moveContact(int fromPos, int toPos) {
-        Timber.d("moveContact() called with: " + "fromPos = [" + fromPos + "], toPos = [" + toPos + "]");
+        Timber.d("moveContact() called with: fromPos = [%d], toPos = [%d]", fromPos, toPos);
         ContactItem item = contactList.get(fromPos);
         contactList.remove(fromPos);
         contactList.add(toPos, item);
@@ -99,13 +96,13 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     public void removeContact(int position) {
-        Timber.d("removeContact() called with: " + "position = [" + position + "]");
+        Timber.d("removeContact() called with: position = [%d]", position);
         contactList.remove(position);
         notifyItemRemoved(position);
     }
 
     public int getContactPositionByLetter(char letter) {
-        Timber.d("getContactPositionByLetter() called with: " + "letter = [" + letter + "] contactPositions=" + contactPositions.size());
+        Timber.d("getContactPositionByLetter() called with: letter = [%c] contactPositions=%d", letter, contactPositions.size());
         if (!contactPositions.containsKey(letter + "")) {
             return -1;
         }
@@ -155,6 +152,5 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         }
     }
 
-    ;
 }
 
